@@ -1,0 +1,78 @@
+---
+title: "LGProject_presentation"
+author: "Rui La"
+date: "November 22, 2016"
+output: ioslides_presentation
+---
+
+##Overview
+
+This data product used dataset downloaded from [basketball Reference](http://www.basketball-reference.com/players/j/jamesle01/gamelog/2015/) to show the relationship between performance of Lebron James and the result of game. 
+
+Lebron James is a all-star player in NBA and his performance on the filed directly affected the result of Cleveland Cavaliers. So if he shot a lot of points or assisted many times during the game, his team will usually win. But is it true. We will see.
+
+The objective of this project is to:
+
++ **shiny to build data product application**
+
++ **R-presentation or slidify to create data product related presentations.**
+
+##Data loading and preprocessing
+
+```{r, eval=FALSE}
+library(shiny)
+library(HistData)
+library(dplyr)
+library(ggplot2)
+library(caret)
+# converting in centimeters
+df = read.csv("Lebron2015.csv")
+df1 = df[,c("X.1", "AST", "PTS", "GmSc")]
+df1$X.1 = substring(df1$X.1, 1,2)
+df1$X.1 = as.factor(df1$X.1)
+# linear model
+regmod <- lm(GmSc ~ AST + PTS , data=df1)
+fitmod = train (X.1 ~AST + PTS,df1,  method = "rf")
+rt = predict (fitmod, newdata=df)
+```
+
+## Points Vs. Game Score Analysis
+
+```{r, echo=FALSE, warning=FALSE, message = FALSE, error=FALSE}
+library(shiny)
+library(HistData)
+library(ggplot2)
+library(caret)
+# converting in centimeters
+df = read.csv("Lebron2015.csv")
+df1 = df[,c("X.1", "AST", "PTS", "GmSc")]
+df1$X.1 = substring(df1$X.1, 1,2)
+df1$X.1 = as.factor(df1$X.1)
+# linear model
+regmod <- lm(GmSc ~ AST + PTS , data=df1)
+fitmod = train (X.1 ~AST + PTS,df1,  method = "rf")
+rt = predict (fitmod, newdata=df)
+```
+
+
+```{r echo=FALSE}
+ggplot(data = df1, aes(x=PTS, y = GmSc, col = X.1))+
+        geom_point()+
+        geom_smooth(method = "lm")
+```
+
+##Assists Vs Game Score Analysis
+
+```{r,echo=FALSE}
+ggplot(data = df1, aes(x=AST, y = GmSc, col = X.1))+
+        geom_point()+
+        geom_smooth(method = "lm")
+```
+
+##Conclusion
+
+From the plots we can see the points James got in that game is significantly related to evaluation given by media. Also the more points he got, the larger probability that Cavalier will win the game. But his assists are not his key factor to influence his evaluation. That is true considering that he often be criticized after a game is he passed too many balls to his teammate. 
+
+##Application
+
+To display the understanding of using shiny to build an application, a simple application called Prediction of total points of Cleveland Cavaliers in a game and game result through Lebron James's performance has been developed and deployed at: 
